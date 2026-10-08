@@ -78,15 +78,29 @@ interface FolioBridge {
   scrollToHeading: (index: number) => void
 }
 
+interface NativeHost {
+  postMessage: (message: NativeMessage) => void
+}
+
 declare global {
   interface Window {
-    webkit?: { messageHandlers?: { folio?: { postMessage: (message: NativeMessage) => void } } }
+    webkit?: { messageHandlers?: { folio?: NativeHost } }
+    /** Windows: редактор живёт во фрейме окна приложения, сообщения принимает родительское окно. */
+    folioHost?: NativeHost
     folio: FolioBridge
   }
 }
 
+const isMac = /Mac/.test(navigator.platform)
+document.documentElement.dataset.platform = isMac ? 'mac' : 'windows'
+
+function nativeHost(): NativeHost | undefined {
+  if (window.webkit?.messageHandlers?.folio) return window.webkit.messageHandlers.folio
+  return window.parent !== window ? window.parent.folioHost : undefined
+}
+
 function post(message: NativeMessage): void {
-  window.webkit?.messageHandlers?.folio?.postMessage(message)
+  nativeHost()?.postMessage(message)
 }
 
 function requireElement<T extends HTMLElement>(id: string): T {
@@ -342,8 +356,8 @@ page.addEventListener('click', (event) => {
   if (!wikiLink && (!anchor || anchor.closest('.page-block'))) return
 
   event.preventDefault()
-  // В режиме правки ссылка — это текст; открыть её можно с ⌘.
-  if (editor.isEditable && !event.metaKey) return
+  // В режиме правки ссылка — это текст; открыть её можно с ⌘ (на Windows — с Ctrl).
+  if (editor.isEditable && !(isMac ? event.metaKey : event.ctrlKey)) return
 
   if (wikiLink) {
     post({ type: 'openPage', space: wikiLink.dataset.space || null, title: wikiLink.dataset.title ?? '' })

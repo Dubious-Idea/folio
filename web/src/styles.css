@@ -3,13 +3,14 @@
 :root {
   color-scheme: light dark;
 
+  --label: -apple-system-label;
   --text: -apple-system-label;
   --text-secondary: -apple-system-secondary-label;
   --text-tertiary: -apple-system-tertiary-label;
   --separator: -apple-system-separator;
   --accent: -apple-system-control-accent;
-  --fill: color-mix(in srgb, -apple-system-label 5%, transparent);
-  --fill-strong: color-mix(in srgb, -apple-system-label 9%, transparent);
+  --fill: color-mix(in srgb, var(--label) 5%, transparent);
+  --fill-strong: color-mix(in srgb, var(--label) 9%, transparent);
 
   --blue: -apple-system-blue;
   --green: -apple-system-green;
@@ -18,6 +19,9 @@
   --red: -apple-system-red;
   --purple: -apple-system-purple;
   --gray: -apple-system-gray;
+  --text-background: -apple-system-text-background;
+  --control-background: -apple-system-control-background;
+  --selection: -apple-system-selected-text-background;
 
   --font-body: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
@@ -46,7 +50,7 @@ body {
 }
 
 ::selection {
-  background: -apple-system-selected-text-background;
+  background: var(--selection);
 }
 
 .page {
@@ -585,7 +589,7 @@ input[type='checkbox'] {
 }
 
 .panel-swatch[aria-pressed='true'] {
-  box-shadow: 0 0 0 2px -apple-system-text-background, 0 0 0 3.5px var(--swatch);
+  box-shadow: 0 0 0 2px var(--text-background), 0 0 0 3.5px var(--swatch);
 }
 
 .panel-swatch-note {
@@ -620,7 +624,7 @@ input[type='checkbox'] {
 .panel-title-input:focus,
 .expand-title-input:focus {
   outline: none;
-  background: color-mix(in srgb, -apple-system-text-background 70%, transparent);
+  background: color-mix(in srgb, var(--text-background) 70%, transparent);
 }
 
 .panel-remove {
@@ -647,9 +651,9 @@ input[type='checkbox'] {
 .folio-popover,
 .folio-toolbar {
   z-index: 1000;
-  border: 0.5px solid color-mix(in srgb, -apple-system-label 16%, transparent);
+  border: 0.5px solid color-mix(in srgb, var(--label) 16%, transparent);
   border-radius: 12px;
-  background: color-mix(in srgb, -apple-system-control-background 84%, transparent);
+  background: color-mix(in srgb, var(--control-background) 84%, transparent);
   box-shadow:
     0 12px 32px color-mix(in srgb, black 22%, transparent),
     0 1px 3px color-mix(in srgb, black 12%, transparent);
@@ -776,7 +780,7 @@ input[type='checkbox'] {
   padding: 5px 8px;
   border: 0.5px solid var(--separator);
   border-radius: 6px;
-  background: -apple-system-text-background;
+  background: var(--text-background);
   color: var(--text);
   font: inherit;
   font-size: var(--text-small);
@@ -798,7 +802,7 @@ input[type='checkbox'] {
   padding: 3px 12px;
   border: 0.5px solid var(--separator);
   border-radius: 6px;
-  background: -apple-system-control-background;
+  background: var(--control-background);
   color: var(--text);
   font: inherit;
   font-size: var(--text-small);
@@ -834,4 +838,57 @@ input[type='checkbox'] {
   * {
     transition: none !important;
   }
+}
+
+/* Windows: цветов -apple-system-* в WebView2 нет — палитра и шрифты Windows 11. Атрибут ставит main.ts. */
+
+:root[data-platform='windows'] {
+  --label: #1b1b1b;
+  --text: #1b1b1b;
+  --text-secondary: #5d5d5d;
+  --text-tertiary: #8a8a8a;
+  --separator: rgba(0, 0, 0, 0.12);
+  --accent: #005fb8;
+  --accent-text: #ffffff;
+
+  --blue: #0067c0;
+  --green: #107c10;
+  --orange: #ca5010;
+  --yellow: #c19c00;
+  --red: #c42b1c;
+  --purple: #8764b8;
+  --gray: #8a8a8a;
+  --text-background: #ffffff;
+  --control-background: #fbfbfb;
+  --selection: rgba(0, 95, 184, 0.24);
+
+  --font-body: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Cascadia Mono', Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-platform='windows'] {
+    --label: #ffffff;
+    --text: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.786);
+    --text-tertiary: rgba(255, 255, 255, 0.544);
+    --separator: rgba(255, 255, 255, 0.12);
+    --accent: #60cdff;
+    --accent-text: #000000;
+
+    --blue: #4cc2ff;
+    --green: #6ccb5f;
+    --orange: #fc8c3a;
+    --yellow: #fce100;
+    --red: #ff99a4;
+    --purple: #c7a8f0;
+    --gray: #9a9a9a;
+    --text-background: #282828;
+    --control-background: #2c2c2c;
+    --selection: rgba(96, 205, 255, 0.3);
+  }
+}
+
+:root[data-platform='windows'] .folio-button-primary {
+  color: var(--accent-text);
 }
