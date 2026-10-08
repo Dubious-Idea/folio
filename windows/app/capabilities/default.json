@@ -1,0 +1,18 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Окна Folio: свои команды, диалоги, ссылки и обновления",
+  "windows": ["*"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-show",
+    "core:window:allow-set-focus",
+    "core:window:allow-set-title",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
+    "dialog:default",
+    "opener:default",
+    "updater:default",
+    "process:default"
+  ]
+}

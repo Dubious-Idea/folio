@@ -1,0 +1,6 @@
+# Исходники Windows-версии храним с LF и на Windows: тексты из src/seed встраиваются через include_str!
+# и должны совпадать байт в байт с теми, что создаёт версия для macOS.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.icns binary

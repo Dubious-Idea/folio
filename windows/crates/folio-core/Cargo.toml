@@ -1,0 +1,24 @@
+[package]
+name = "folio-core"
+description = "Модель страниц Folio: пространства, ссылки, поиск, история git"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+dirs = "7.0.0"
+git2 = { version = "0.21.0", default-features = false, features = ["vendored-libgit2"] }
+rayon = "1.12.0"
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+rustc-hash = "2.1.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+thiserror = "2.0.21"
+trash = "5.2.9"
+uuid = { version = "1.27.0", features = ["v4", "serde"] }
+yaml-rust2 = "0.13.0"
+
+[dev-dependencies]
+tempfile = "3.27.0"
