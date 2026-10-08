@@ -1,0 +1,76 @@
+name: Windows
+
+on:
+  push:
+    branches: [main, windows]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            windows/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: windows
+
+      - name: Версия из тега
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          if ($version -ne (Get-Content VERSION -Raw).Trim()) { throw "Тег ${{ github.ref_name }} не совпадает с файлом VERSION" }
+
+      - name: Сборка и тесты
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: windows/scripts/build.ps1
+
+      - name: Файл автообновления
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          $bundle = 'windows/target/release/bundle/nsis'
+          $installer = Get-ChildItem $bundle -Filter '*-setup.exe' | Select-Object -First 1
+          $signature = Get-Content "$($installer.FullName).sig" -Raw
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$($installer.Name)"
+          $feed = [ordered]@{
+            version = $version
+            notes = "Folio $version для Windows"
+            pub_date = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+            platforms = @{ 'windows-x86_64' = @{ signature = $signature.Trim(); url = $url } }
+          }
+          $feed | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8NoBOM "$bundle/latest.json"
+
+      - name: Установщик как артефакт
+        uses: actions/upload-artifact@v4
+        with:
+          name: Folio-Windows
+          path: windows/target/release/bundle/nsis/*-setup.exe
+
+      - name: Публикация в выпуск
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            windows/target/release/bundle/nsis/*-setup.exe
+            windows/target/release/bundle/nsis/*-setup.exe.sig
+            windows/target/release/bundle/nsis/latest.json
